@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "32289987051",
+    "project_id": "busify-fbb79",
+    "storage_bucket": "busify-fbb79.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:32289987051:android:bb0b710166efb5259861ae",
+        "android_client_info": {
+          "package_name": "com.example.busify"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "32289987051-vuv6gcc497ov82tt4vbn8invbumi6vml.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.busify",
+            "certificate_hash": "ec58e2eb23ff0693421792f4f05e1959b48e3b55"
+          }
+        },
+        {
+          "client_id": "32289987051-sggur5u61mc0q6cqcbkng3nu7en8r42s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBypA_B1_J5BnfFqMG9Tlf12mjbZPhn_Eg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "32289987051-sggur5u61mc0q6cqcbkng3nu7en8r42s.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
