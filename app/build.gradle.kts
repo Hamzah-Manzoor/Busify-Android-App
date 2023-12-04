@@ -55,6 +55,9 @@ dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
     implementation (platform("com.google.firebase:firebase-bom:31.0.0"))
     implementation("com.google.firebase:firebase-auth-ktx")
+    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.4.1")
+    implementation ("androidx.hilt:hilt-navigation-compose:1.0.0")
+    implementation("androidx.compose.foundation:foundation:1.5.4")
 
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation("androidx.activity:activity-compose:1.8.1")

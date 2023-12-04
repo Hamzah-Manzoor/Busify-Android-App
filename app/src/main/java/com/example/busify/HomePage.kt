@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.graphics.*;
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,18 +16,13 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.*
-import androidx.compose.material3.icons.Icons
-import androidx.compose.material3.icons.filled.AccountCircle
-import androidx.compose.material3.icons.filled.History
-import androidx.compose.material3.icons.filled.LocalAtm
-import androidx.compose.material3.icons.filled.Payment
+
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Blue
-import androidx.compose.ui.graphics.Color.Companion.LightBlue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -83,7 +79,7 @@ fun BalanceSection() {
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
-        style = MaterialTheme.typography.body1
+        style = MaterialTheme.typography.bodySmall
     )
 }
 
@@ -99,7 +95,7 @@ fun BusifySection() {
     ) {
         Text(
             text = "Busify",
-            style = MaterialTheme.typography.h4,
+            style = MaterialTheme.typography.titleSmall,
             color = Color.White
         )
     }
@@ -110,14 +106,16 @@ fun MainOptionsSection() {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(LightBlue)
+            .background(Blue)
             .padding(16.dp)
     ) {
         val options = listOf(
-            OptionItem("Buy Ticket", Icons.Default.LocalAtm),
+            //OptionItem("Buy Ticket", Icons.Default.Lo),
             OptionItem("My Profile", Icons.Default.AccountCircle),
-            OptionItem("Booking History", Icons.Default.History),
-            OptionItem("Refund", Icons.Default.Payment)
+            //OptionItem("Booking History", Icons.Default.History),
+            //OptionItem("Refund", Icons.Default.Payment)
+
+
         )
 
         items(options.chunked(2)) { rowItems ->
@@ -142,7 +140,7 @@ fun OptionCard(option: OptionItem) {
             .clickable { /* Handle click here */ }
             .fillMaxWidth()
             .height(120.dp),
-        elevation = 4.dp
+
     ) {
         Column(
             modifier = Modifier
@@ -157,7 +155,7 @@ fun OptionCard(option: OptionItem) {
                 tint = MaterialTheme.colorScheme.primary
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = option.title, style = MaterialTheme.typography.h6)
+            Text(text = option.title, style = MaterialTheme.typography.titleSmall)
         }
     }
 }
