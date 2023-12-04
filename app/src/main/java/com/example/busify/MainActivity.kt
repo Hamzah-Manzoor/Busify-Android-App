@@ -78,10 +78,18 @@ class MainActivity : ComponentActivity() {
                     //SignUpScreen()
 //                        LoginPreview()
                    // HomePreview()
-                UserProfileView()
+                //UserProfileView()
+                TicketHistoryPage(getDummyTicketList())
                 }
             }
         }
+    }
+    private fun getDummyTicketList(): List<Ticket> {
+        return listOf(
+            Ticket("Ticket 1", "Description 1", "Source 1", "Destination 1", "$10", "Date 1"),
+            Ticket("Ticket 2", "Description 2", "Source 2", "Destination 2", "$15", "Date 2"),
+            // Add more tickets as needed
+        )
     }
 }
 
