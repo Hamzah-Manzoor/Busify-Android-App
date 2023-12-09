@@ -1,22 +1,32 @@
 package com.example.busify
 
+//import androidx.compose.material3.Icons
+//import androidx.compose.ui.graphics.Color.Companion.LightBlue
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.ui.graphics.*;
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material3.*
-
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.LocalAtm
+import androidx.compose.material.icons.filled.Payment
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,17 +34,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Blue
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.platform.LocalTextInputService
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.busify.ui.theme.BusifyTheme
+
+
+val LightBlue = Color(173, 216, 230)
 
 class HomePage : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,9 +88,13 @@ fun BalanceSection() {
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
-        style = MaterialTheme.typography.bodySmall
+        style = MaterialTheme.typography.bodyMedium, // Adjust the typography style for the desired font size
+        color = Color.White,
+        textAlign = TextAlign.Center
     )
 }
+
+
 
 @Composable
 fun BusifySection() {
@@ -95,38 +108,41 @@ fun BusifySection() {
     ) {
         Text(
             text = "Busify",
-            style = MaterialTheme.typography.titleSmall,
-            color = Color.White
+            style = MaterialTheme.typography.headlineLarge, // Adjust the typography style for the desired font size and style
+            color = Color.White,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 40.sp,
+            fontFamily = FontFamily.Serif,
         )
     }
 }
 
+
 @Composable
 fun MainOptionsSection() {
-    LazyColumn(
+    Row(
         modifier = Modifier
-            .fillMaxSize()
-            .background(Blue)
-            .padding(16.dp)
+            .fillMaxWidth()
+            .background(LightBlue)
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        val options = listOf(
-            //OptionItem("Buy Ticket", Icons.Default.Lo),
-            OptionItem("My Profile", Icons.Default.AccountCircle),
-            //OptionItem("Booking History", Icons.Default.History),
-            //OptionItem("Refund", Icons.Default.Payment)
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 8.dp)
+        ) {
+            OptionCard(OptionItem("Buy Ticket", Icons.Default.LocalAtm))
+            OptionCard(OptionItem("My Profile", Icons.Default.AccountCircle))
+        }
 
-
-        )
-
-        items(options.chunked(2)) { rowItems ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                rowItems.forEach { option ->
-                    OptionCard(option)
-                }
-            }
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 8.dp)
+        ) {
+            OptionCard(OptionItem("Booking History", Icons.Default.History))
+            OptionCard(OptionItem("Refund", Icons.Default.Payment))
         }
     }
 }
@@ -135,12 +151,11 @@ fun MainOptionsSection() {
 fun OptionCard(option: OptionItem) {
     Card(
         modifier = Modifier
-            .padding(8.dp)
+            .padding(vertical = 16.dp, horizontal = 8.dp)
             .clip(MaterialTheme.shapes.medium)
-            .clickable { /* Handle click here */ }
+            .clickable { navigateToScreen(option.title) } // Example: navigate to screen based on option title
             .fillMaxWidth()
             .height(120.dp),
-
     ) {
         Column(
             modifier = Modifier
@@ -152,13 +167,23 @@ fun OptionCard(option: OptionItem) {
             Icon(
                 imageVector = option.icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(48.dp) // Adjust the icon size as needed
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = option.title, style = MaterialTheme.typography.titleSmall)
+            Text(
+                text = option.title,
+                style = MaterialTheme.typography.bodySmall, // Adjust the typography style for the text
+                textAlign = TextAlign.Center // Center align the text
+            )
         }
     }
 }
+
+fun navigateToScreen(title: String) {
+    TODO("Not yet implemented")
+}
+
 
 data class OptionItem(val title: String, val icon: ImageVector)
 
