@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.sp
 import com.example.busify.ui.theme.BusifyTheme
 
 
-val LightBlue = Color(173, 216, 230)
+val LightBlue = Color(170, 210, 245)
 val Blue = Color(17, 58, 105)
 
 class HomePage : ComponentActivity() {
