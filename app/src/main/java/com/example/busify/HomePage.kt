@@ -68,7 +68,7 @@ fun HomeScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            //.padding(16.dp)
     ) {
         // Top section with balance
         BalanceSection()
