@@ -1,7 +1,7 @@
 package com.example.busify
 
-//import androidx.compose.material3.Icons
-//import androidx.compose.ui.graphics.Color.Companion.LightBlue
+//import androidx.compose.ui.graphics.Color.Companion.Blue
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -32,12 +32,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-//import androidx.compose.ui.graphics.Color.Companion.Blue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.busify.ui.theme.BusifyTheme
@@ -46,7 +44,7 @@ import com.example.busify.ui.theme.BusifyTheme
 val LightBlue = Color(170, 210, 245)
 val Blue = Color(17, 58, 105)
 
-class HomePage : ComponentActivity() {
+class HomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -56,7 +54,8 @@ class HomePage : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HomeScreen()
+                    val username = intent.getStringExtra("username") ?: ""
+                    HomeScreen(username)
                 }
             }
         }
@@ -64,14 +63,15 @@ class HomePage : ComponentActivity() {
 }
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(username : String) {
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            //.padding(16.dp)
+            .padding(16.dp)
     ) {
         // Top section with balance
-        BalanceSection()
+        WelcomeSection(username)
 
         // "Busify" section
         BusifySection()
@@ -81,11 +81,13 @@ fun HomeScreen() {
     }
 }
 
+
+
 @Composable
-fun BalanceSection() {
+fun WelcomeSection(username: String) {
     // Placeholder for balance, replace with actual balance logic
     Text(
-        text = "Balance: $100.00",
+        text = "Welcome, $username",
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
@@ -94,8 +96,6 @@ fun BalanceSection() {
         textAlign = TextAlign.Center
     )
 }
-
-
 
 @Composable
 fun BusifySection() {
@@ -136,7 +136,6 @@ fun MainOptionsSection() {
             OptionCard(OptionItem("Buy Ticket", Icons.Default.LocalAtm))
             OptionCard(OptionItem("My Profile", Icons.Default.AccountCircle))
         }
-
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -189,10 +188,10 @@ fun navigateToScreen(title: String) {
 
 data class OptionItem(val title: String, val icon: ImageVector)
 
-@Preview(heightDp = 550, widthDp = 350)
-@Composable
-fun HomePreview() {
-    BusifyTheme {
-        HomeScreen()
-    }
-}
+//@Preview(heightDp = 550, widthDp = 350)
+//@Composable
+//fun HomePreview() {
+//    BusifyTheme {
+//        HomeScreen(username = "Juni")
+//    }
+//}
