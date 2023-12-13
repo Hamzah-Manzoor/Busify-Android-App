@@ -55,10 +55,12 @@ dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
     implementation (platform("com.google.firebase:firebase-bom:31.0.0"))
     implementation("com.google.firebase:firebase-auth-ktx")
-    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
-    implementation ("androidx.hilt:hilt-navigation-compose:1.1.0")
-    implementation("androidx.compose.foundation:foundation:1.5.4")
+    implementation("com.google.firebase:firebase-firestore")
 
+    implementation("androidx.compose.material:material-icons-core:1.5.4") // Replace with the correct version
+    implementation("androidx.compose.material:material-icons-extended:1.5.4") // Replace with the correct version
+
+    
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation("androidx.activity:activity-compose:1.8.1")
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
@@ -77,6 +79,5 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
-    implementation("androidx.compose.material:material-icons-core:1.5.4") // Replace with the correct version
-    implementation("androidx.compose.material:material-icons-extended:1.5.4") // Replace with the correct version
+
 }

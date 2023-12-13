@@ -1,6 +1,7 @@
 package com.example.busify
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,14 +10,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
@@ -31,6 +31,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,10 +51,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.busify.ui.theme.BusifyTheme
+import com.google.firebase.FirebaseApp
+import com.google.firebase.firestore.FirebaseFirestore
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        FirebaseApp.initializeApp(this)
         setContent {
             BusifyTheme {
                 // A surface container using the 'background' color from the theme
@@ -71,30 +75,22 @@ class LoginActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .background(
-                color = Color.Black,
-                shape = RoundedCornerShape(16.dp)
-            )
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.appbackground),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop, // Crop the image to fill the entire space
-            alignment = Alignment.TopStart // Align the image to the top-left corner
-        )
-
+    CompositionLocalProvider(LocalContext provides LocalContext.current) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Black.copy(alpha = 0.5f)) // Set the alpha value for transparency
         ) {
+            Image(
+                painter = painterResource(id = R.drawable.appbackground),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop, // Crop the image to fill the entire space
+                alignment = Alignment.TopStart // Align the image to the top-left corner
+            )
 
             val context = LocalContext.current
+            val db = FirebaseFirestore.getInstance()
             val usernameState = remember { mutableStateOf("") }
             val passwordState = remember { mutableStateOf("") }
 
@@ -178,33 +174,57 @@ fun LoginScreen() {
 
                 )
 
+                Spacer(modifier = Modifier.padding(20.dp))
+
                 // Login Button
                 Button(
-                    onClick = { handleLogin(context, usernameState.value, passwordState.value) },
+                    onClick = {
+                        handleLogin(
+                            context,
+                            usernameState.value,
+                            passwordState.value,
+                            db
+                        )
+                    },
                     modifier = Modifier.width(120.dp),
                     colors = ButtonDefaults.buttonColors(Color(6, 214, 160))
                 ) {
 
-                    Text(text = "Login");
+                    Text(text = "Login")
                 }
+
+                Text(text = "OR", color = Color.White)
+
+                // Google Registration Button
+                Button(
+                    onClick = {},
+                    modifier = Modifier.width(220.dp),
+                    colors = ButtonDefaults.buttonColors(Color(255, 195, 0))
+                ) {
+
+                    Text(text = "Login with Google")
+                }
+
 
                 // Divider
                 Divider(
                     color = Color.White,
                     thickness = 1.dp,
                     modifier = Modifier
-                        .width(170.dp)
+                        .width(200.dp)
                         .padding(vertical = 16.dp)
                 )
 
-                // Google Registration Button
+                //Button to navigate to signup
                 Button(
-                    onClick = { /* Handle Google registration button click */ },
-                    modifier = Modifier.width(250.dp),
-                    colors = ButtonDefaults.buttonColors(Color(255, 195, 0))
+                    onClick = {
+                        val intent = Intent(context, SignUpActivity::class.java)
+                        context.startActivity(intent)
+                    },
+                    modifier = Modifier.width(120.dp),
+                    colors = ButtonDefaults.buttonColors(Color(0, 180, 216))
                 ) {
-
-                    Text(text = "Login with Google")
+                    Text(text = "Back To Sign Up")
                 }
 
             }
@@ -212,7 +232,7 @@ fun LoginScreen() {
     }
 }
 
-fun handleLogin(context: Context, username : String, password: String){
+fun handleLogin(context: Context, username : String, password: String, db: FirebaseFirestore){
 
     if(username.isEmpty() && password.isEmpty()){
         showToast(context,"Please fill in all fields")
@@ -226,8 +246,40 @@ fun handleLogin(context: Context, username : String, password: String){
         showToast(context,"Please Enter Password")
     }
 
-    showToast(context,"LogIn Successful");
+    val usersCollection = db.collection("User")
+    usersCollection
+        .whereEqualTo("username", username)
+        .get()
+        .addOnSuccessListener { documents ->
+            if (!documents.isEmpty) {
+                // User found in Fire store
+                // Now, check if the provided password matches the stored password
+                val userDocument = documents.documents[0]
+                val storedPassword = userDocument.getString("password") // Replace "password" with the actual field name in your Fire store document
+
+                if (password == storedPassword) {
+                    // Passwords match, login successful
+                    showToast(context, "Login Successful")
+
+                    // Redirect to the next screen or perform any necessary actions
+                    val intent = Intent(context, HomeActivity::class.java)
+                    intent.putExtra("username", username)
+                    context.startActivity(intent)
+                } else {
+                    // Passwords do not match
+                    showToast(context, "Invalid credentials. Password incorrect.")
+                }
+            } else {
+                // User not found in Fire store
+                showToast(context, "Invalid credentials. User not found.")
+            }
+        }
+        .addOnFailureListener { e ->
+            showToast(context, "Error checking user: $e")
+        }
 }
+
+
 
 @Preview(showBackground = true, heightDp = 550, widthDp = 350)
 @Composable
