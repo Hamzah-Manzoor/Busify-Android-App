@@ -227,6 +227,7 @@ fun LoginScreen() {
 //
 //                    Text(text = "Login with Google")
 //                }
+                // Google sign in didn't work
 
 
                 // Divider

@@ -154,6 +154,7 @@ fun MainOptionsSection(username: String, email: String) {
                 .padding(start = 8.dp)
         ) {
             OptionCard(OptionItem("Booking History", Icons.Default.History),context, username, email)
+            //No need to for refund right now
 //            OptionCard(OptionItem("Refund", Icons.Default.Payment),context, username, email)
             //Any Other Card
         }

@@ -258,12 +258,6 @@ fun UserProfileView(username : String, email: String) {
                     Text(text = "Update")
                 }
                 Spacer(modifier = Modifier.height(16.dp))
-//                LogoutButton(onLogoutConfirmed = {
-//                    // This block will be executed when the user confirms logout
-//                    // Perform the logout action and navigate to the login screen
-//                    // You can call your navigation function here
-//                    // For example, navigateToLoginScreen()
-//                },context)
             }
 
         }
