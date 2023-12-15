@@ -228,7 +228,7 @@ fun TripCard(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(LightBlue)
+                .background(Color(60, 90, 120))
                 .padding(16.dp),
         ) {
             // Departure and arrival times at the bottom
@@ -416,14 +416,14 @@ fun SeatSelectionPopup(
                         // Handle buy button click
                         saveBookingToDatabase(
                             busId,
-                            userName, // Fixed username for now
+                            userName,
                             busName,
                             selectedSeats,
                             totalPrice,
-                            sourceCity, // Replace with actual source city
-                            destinationCity, // Replace with actual destination city
-                            departureTime, // Replace with actual departure time
-                            arrivalTime, // Replace with actual arrival time
+                            sourceCity,
+                            destinationCity,
+                            departureTime,
+                            arrivalTime,
                             onSuccess = {
                                 onSeatSelected(selectedSeats)
                                 onDismiss()
@@ -512,7 +512,7 @@ fun saveBookingToDatabase(
                 bookedSeats.forEachIndexed { index, selected ->
                     if (selected) {
                         // Replace the existing string at the selected index with the fixed string "testUser"
-                        updatedBookedSeats[(index).toString()] = "testUser" // Use seat numbers as keys
+                        updatedBookedSeats[(index).toString()] = username // Use seat numbers as keys
                     }
                 }
 
