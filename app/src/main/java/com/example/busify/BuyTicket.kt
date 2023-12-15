@@ -58,7 +58,8 @@ class BuyTicket : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    BuyTicketScreen()
+                    val username = intent.getStringExtra("username") ?: ""
+                    BuyTicketScreen(username)
                 }
             }
         }
@@ -79,7 +80,7 @@ data class Trip(
 
 
 @Composable
-fun BuyTicketScreen() {
+fun BuyTicketScreen(username : String) {
 
     var trips by remember { mutableStateOf(emptyList<TripWithId>()) }
 
@@ -108,7 +109,7 @@ fun BuyTicketScreen() {
 
         // Display TripCard for each fetched trip
         trips.forEach { tripWithId ->
-            TripCard(trip = tripWithId.trip, onSeatSelected = { updatedSeats ->
+            TripCard(username, trip = tripWithId.trip, onSeatSelected = { updatedSeats ->
                 // Update the booked seats for the selected trip
                 // You can add your own logic here
 
@@ -184,7 +185,7 @@ fun HeaderSection() {
         BackButton()
 
         // Balance Section
-        //BalanceSection()
+        //BalanceSection(username)
 
 
     }
@@ -205,6 +206,7 @@ fun BackButton() {
 
 @Composable
 fun TripCard(
+    username: String,
     trip: Trip,
     onSeatSelected: (List<Boolean>) -> Unit
 ) {
@@ -283,6 +285,7 @@ fun TripCard(
     // Display the SeatSelectionPopup when isPopupVisible is true
     if (isPopupVisible) {
         SeatSelectionPopup(
+            userName = username,
             busId = trip.busId,
             sourceCity = trip.sourceCity, // Replace with actual source city
             destinationCity = trip.destinationCity, // Replace with actual destination city
@@ -305,6 +308,7 @@ fun TripCard(
 
 @Composable
 fun SeatSelectionPopup(
+    userName: String,
     busId: Int,
     sourceCity: String, // Replace with actual source city
     destinationCity: String, // Replace with actual destination city
@@ -409,7 +413,7 @@ fun SeatSelectionPopup(
                         // Handle buy button click
                         saveBookingToDatabase(
                             busId,
-                            "myuser", // Fixed username for now
+                            userName, // Fixed username for now
                             busName,
                             selectedSeats,
                             totalPrice,
@@ -576,6 +580,6 @@ private inline fun <T> Iterable<T>.countIndexed(predicate: (index: Int, T) -> Bo
 @Composable
 fun BuyTicketPreview() {
     BusifyTheme {
-        BuyTicketScreen()
+        BuyTicketScreen("")
     }
 }

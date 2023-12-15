@@ -193,8 +193,9 @@ fun OptionCard(option: OptionItem,context: Context, username: String, email: Str
     }
 }
 
-fun navigateToBuyTicket(context: Context) {
+fun navigateToBuyTicket(context: Context, username: String) {
     val intent = Intent(context, BuyTicket::class.java)
+    intent.putExtra("username", username)
     context.startActivity(intent)
 }
 
@@ -209,7 +210,7 @@ fun navigateToUserProfile(context: Context, username: String, email: String){
 //}
 fun navigateToScreen(title: String, context: Context, username: String, email: String) {
     if(title == "Buy Ticket"){
-        navigateToBuyTicket(context)
+        navigateToBuyTicket(context, username)
     }
     if(title == "My Profile"){
         navigateToUserProfile(context, username, email)
