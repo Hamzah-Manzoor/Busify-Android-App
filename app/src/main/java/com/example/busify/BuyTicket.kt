@@ -2,6 +2,7 @@ package com.example.busify
 
 //import androidx.compose.ui.platform.LocalDensityOwner
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -26,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.busify.ui.theme.BusifyTheme
+import com.google.firebase.firestore.FirebaseFirestore
 
 
 val DarkBlue = Color(10, 40, 80)
@@ -62,105 +65,109 @@ class BuyTicket : ComponentActivity() {
     }
 }
 
+data class Trip(
+    val busId: Int,
+    val busName: String,
+    val sourceCity: String,
+    val destinationCity: String,
+    val departureTime: String,
+    val arrivalTime: String,
+    val ticketCost: Int,
+    val bookedSeats: Map<String, String>  // Change this line
+)
+
+
+
 @Composable
 fun BuyTicketScreen() {
+
+    var trips by remember { mutableStateOf(emptyList<TripWithId>()) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Blue)
             .padding(0.dp)
     ) {
+        val db = FirebaseFirestore.getInstance()
+        LaunchedEffect(key1 = Unit) {
+            // Fetch trips from the database when the screen is launched
+            getTripsFromDatabase(
+                db,
+                onSuccess = { fetchedTrips ->
+                    trips = fetchedTrips
+                },
+                onFailure = { e ->
+                    // Handle failure
+                }
+            )
+        }
+
         // Page Header - Balance Section
         HeaderSection()
 
-        TripCard(
-            busName = "Safari Bus",
-            sourceCity = "Faisalabad",
-            destinationCity = "Gujranwala",
-            departureTime = "09:30 AM",
-            arrivalTime = "04:00 PM",
-            ticketCost = "$45",
-            bookedSeats = listOf(true, false, true, false, false, true),
-            onSeatSelected = { updatedSeats ->
-                // Update the booked seats for "Desert Voyager"
+        // Display TripCard for each fetched trip
+        trips.forEach { tripWithId ->
+            TripCard(trip = tripWithId.trip, onSeatSelected = { updatedSeats ->
+                // Update the booked seats for the selected trip
                 // You can add your own logic here
-            }
-        )
 
-        TripCard(
-            busName = "Mountain Explorer",
-            sourceCity = "Sialkot",
-            destinationCity = "Sargodha",
-            departureTime = "11:00 AM",
-            arrivalTime = "05:30 PM",
-            ticketCost = "$50",
-            bookedSeats = listOf(true, false, true, false, false, true),
-            onSeatSelected = { updatedSeats ->
-                // Update the booked seats for "Desert Voyager"
-                // You can add your own logic here
-            }
-        )
-
-        TripCard(
-            busName = "Desert Voyager",
-            sourceCity = "Hyderabad",
-            destinationCity = "Sukkur",
-            departureTime = "12:45 PM",
-            arrivalTime = "06:15 PM",
-            ticketCost = "$55",
-            bookedSeats = listOf(true, false, true, false, false, true),
-            onSeatSelected = { updatedSeats ->
-                // Update the booked seats for "Desert Voyager"
-                // You can add your own logic here
-            }
-        )
-
-        TripCard(
-            busName = "Royal Express",
-            sourceCity = "Bahawalpur",
-            destinationCity = "Dera Ghazi Khan",
-            departureTime = "02:15 PM",
-            arrivalTime = "07:45 PM",
-            ticketCost = "$60",
-            bookedSeats = listOf(true, false, true, false, false, true),
-            onSeatSelected = { updatedSeats ->
-                // Update the booked seats for "Desert Voyager"
-                // You can add your own logic here
-            }
-        )
-
-        TripCard(
-            busName = "Majestic Travels",
-            sourceCity = "Mirpur Khas",
-            destinationCity = "Jhelum",
-            departureTime = "03:45 PM",
-            arrivalTime = "09:15 PM",
-            ticketCost = "$65",
-            bookedSeats = listOf(true, false, true, false, false, true),
-            onSeatSelected = { updatedSeats ->
-                // Update the booked seats for "Desert Voyager"
-                // You can add your own logic here
-            }
-        )
-
-        TripCard(
-            busName = "Sunrise Transport",
-            sourceCity = "Nowshera",
-            destinationCity = "Muzaffarabad",
-            departureTime = "05:30 PM",
-            arrivalTime = "11:00 PM",
-            ticketCost = "$70",
-            bookedSeats = listOf(true, false, true, false, false, true),
-            onSeatSelected = { updatedSeats ->
-                // Update the booked seats for "Desert Voyager"
-                // You can add your own logic here
-            }
-        )
-
+                // After booking is successful, refetch the trips from the database
+                getTripsFromDatabase(
+                    db,
+                    onSuccess = { fetchedTrips ->
+                        trips = fetchedTrips
+                    },
+                    onFailure = { e ->
+                        // Handle failure
+                    }
+                )
+            })
+        }
 
         // Add more TripCard components as needed
     }
 }
+
+
+
+fun getTripsFromDatabase(
+    db: FirebaseFirestore,
+    onSuccess: (List<TripWithId>) -> Unit,
+    onFailure: (Exception) -> Unit
+) {
+    val trips = mutableListOf<TripWithId>()
+    val tripsCollection = db.collection("Trips")
+
+    tripsCollection
+        .get()
+        .addOnSuccessListener { documents ->
+            for (document in documents) {
+                val trip = Trip(
+                    busId = document.getLong("id")?.toInt() ?: 0,
+                    busName = document.getString("busName") ?: "",
+                    sourceCity = document.getString("sourceCity") ?: "",
+                    destinationCity = document.getString("destinationCity") ?: "",
+                    departureTime = document.getString("departureTime") ?: "",
+                    arrivalTime = document.getString("arrivalTime") ?: "",
+                    ticketCost = (document.getDouble("ticketCost") ?: 0.0).toInt(),
+                    bookedSeats = document.get("bookedSeats") as? Map<String, String> ?: emptyMap()  // Change this line
+                )
+                val tripWithId = TripWithId(trip)
+                trips.add(tripWithId)
+            }
+            onSuccess(trips)
+        }
+        .addOnFailureListener { e ->
+            onFailure(e)
+        }
+}
+
+
+data class TripWithId(val trip: Trip)
+
+
+
 
 @Composable
 fun HeaderSection() {
@@ -177,7 +184,7 @@ fun HeaderSection() {
         BackButton()
 
         // Balance Section
-        BalanceSection()
+        //BalanceSection()
 
 
     }
@@ -198,13 +205,7 @@ fun BackButton() {
 
 @Composable
 fun TripCard(
-    busName: String,
-    sourceCity: String,
-    destinationCity: String,
-    departureTime: String,
-    arrivalTime: String,
-    ticketCost: String,
-    bookedSeats: List<Boolean> = List(6) { false }, // Default to an empty list of 6 seats
+    trip: Trip,
     onSeatSelected: (List<Boolean>) -> Unit
 ) {
     var isPopupVisible by remember { mutableStateOf(false) }
@@ -214,7 +215,6 @@ fun TripCard(
             .padding(vertical = 10.dp, horizontal = 13.dp)
             .clip(MaterialTheme.shapes.medium)
             .clickable {
-                //onSeatSelected(bookedSeats.map { !it }) // Invert the booked seats for demonstration purposes
                 isPopupVisible = true
             }
             .fillMaxWidth()
@@ -233,15 +233,19 @@ fun TripCard(
                     .padding(top = 4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = "Bus: $busName", style = MaterialTheme.typography.labelSmall)
+                Text(text = "Bus: ${trip.busName} (${trip.busId})", style = MaterialTheme.typography.labelSmall)
                 Text(
-                    text = "Cost: $ticketCost",
+                    text = "Cost: $${trip.ticketCost}",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.ExtraBold
                 )
             }
 
-            Text(text = "$sourceCity To $destinationCity", style = MaterialTheme.typography.bodyMedium, fontSize = 20.sp)
+            Text(
+                text = "${trip.sourceCity} To ${trip.destinationCity}",
+                style = MaterialTheme.typography.bodyMedium,
+                fontSize = 20.sp
+            )
 
             Row(
                 modifier = Modifier
@@ -249,8 +253,8 @@ fun TripCard(
                     .padding(top = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = "$departureTime", style = MaterialTheme.typography.bodyMedium)
-                Text(text = "$arrivalTime", style = MaterialTheme.typography.bodyMedium)
+                Text(text = "${trip.departureTime}", style = MaterialTheme.typography.bodyMedium)
+                Text(text = "${trip.arrivalTime}", style = MaterialTheme.typography.bodyMedium)
             }
 
             // Display booked seats as "X" or "O"
@@ -260,14 +264,15 @@ fun TripCard(
                     .padding(top = 8.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
-                bookedSeats.forEachIndexed { index, isBooked ->
+                for (index in 0 until trip.bookedSeats.size) {
+                    val seatStatus = trip.bookedSeats[index.toString()] ?: ""
                     Text(
-                        text = if (isBooked) "X" else "O",
+                        text = if (seatStatus.isNotBlank()) "X" else "O",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.ExtraBold,
-                        color = if (isBooked) Color.Red else Color.Green
+                        color = if (seatStatus.isNotBlank()) Color.Red else Color.Green
                     )
-                    if (index < bookedSeats.size - 1) {
+                    if (index < trip.bookedSeats.size - 1) {
                         Spacer(modifier = Modifier.width(8.dp))
                     }
                 }
@@ -278,10 +283,15 @@ fun TripCard(
     // Display the SeatSelectionPopup when isPopupVisible is true
     if (isPopupVisible) {
         SeatSelectionPopup(
-            busName = busName,
-            bookedSeats = bookedSeats,
+            busId = trip.busId,
+            sourceCity = trip.sourceCity, // Replace with actual source city
+            destinationCity = trip.destinationCity, // Replace with actual destination city
+            departureTime = trip.departureTime, // Replace with actual departure time
+            arrivalTime = trip.arrivalTime,
+            busName = trip.busName,
+            bookedSeats = trip.bookedSeats.map { (_, value) -> value.isNotBlank() },
             onSeatSelected = {
-                onSeatSelected(it)
+                onSeatSelected(it.map { selected -> selected })
                 isPopupVisible = false
             },
             onDismiss = {
@@ -292,8 +302,14 @@ fun TripCard(
 }
 
 
+
 @Composable
 fun SeatSelectionPopup(
+    busId: Int,
+    sourceCity: String, // Replace with actual source city
+    destinationCity: String, // Replace with actual destination city
+    departureTime: String, // Replace with actual departure time
+    arrivalTime: String,
     busName: String,
     bookedSeats: List<Boolean>,
     onSeatSelected: (List<Boolean>) -> Unit,
@@ -391,6 +407,22 @@ fun SeatSelectionPopup(
                 Button(
                     onClick = {
                         // Handle buy button click
+                        saveBookingToDatabase(
+                            busId,
+                            "myuser", // Fixed username for now
+                            busName,
+                            selectedSeats,
+                            totalPrice,
+                            sourceCity, // Replace with actual source city
+                            destinationCity, // Replace with actual destination city
+                            departureTime, // Replace with actual departure time
+                            arrivalTime, // Replace with actual arrival time
+                            onSuccess = {
+                                onSeatSelected(selectedSeats)
+                                onDismiss()
+                            }
+                        )
+
                         onSeatSelected(selectedSeats)
                         onDismiss()
                     },
@@ -408,10 +440,123 @@ fun SeatSelectionPopup(
                     Text(text = "Cancel", color = Color.White)
                 }
             }
-
         }
     }
 }
+
+// Function to save booking data to the database
+fun saveBookingToDatabase(
+    busId: Int,
+    username: String,
+    busName: String,
+    bookedSeats: List<Boolean>,
+    totalCost: Int,
+    sourceCity: String,
+    destinationCity: String,
+    departureTime: String,
+    arrivalTime: String,
+    onSuccess: () -> Unit
+) {
+    val db = FirebaseFirestore.getInstance()
+    val bookingHistoryCollection = db.collection("BookingHistory")
+    val tripsCollection = db.collection("Trips")
+
+    // Save booking data to BookingHistory collection
+    val bookingData = hashMapOf(
+        "busId" to busId,
+        "username" to username,
+        "busName" to busName,
+        "bookedSeatNumbers" to bookedSeats.mapIndexedNotNull { index, selected -> if (selected) index + 1 else null },
+        "totalCost" to totalCost,
+        "sourceCity" to sourceCity,
+        "destinationCity" to destinationCity,
+        "departureTime" to departureTime,
+        "arrivalTime" to arrivalTime
+    )
+
+    // Save booking data and get the automatically generated ID
+    val bookingRef = bookingHistoryCollection.document() // Use the provided ID
+    val bookingId = bookingRef.id
+
+    // Save the booking data to BookingHistory collection
+    bookingRef.set(bookingData)
+        .addOnSuccessListener {
+            Log.d("Booking", "Booking data saved to BookingHistory successfully")
+        }
+        .addOnFailureListener { e ->
+            Log.w("Booking", "Error saving booking data to BookingHistory", e)
+        }
+
+    // Get the document from Trips collection
+    val query = tripsCollection.whereEqualTo("id", busId)
+
+    query.get()
+        .addOnSuccessListener { tripDocSnapshots ->
+            if (tripDocSnapshots.documents.isNotEmpty()) {
+                // Assuming "id" is the field that contains busId
+                val tripDoc = tripDocSnapshots.documents[0]
+
+                // Log information about the retrieved document
+                Log.d("Booking", "Retrieved document: $tripDoc")
+                Log.d("Booking", "Source City: ${tripDoc["sourceCity"]}")
+
+                // Update bookedSeats map in the document
+                val updatedBookedSeats = tripDoc["bookedSeats"] as? MutableMap<String, String> ?: mutableMapOf()
+                bookedSeats.forEachIndexed { index, selected ->
+                    if (selected) {
+                        // Replace the existing string at the selected index with the fixed string "testUser"
+                        updatedBookedSeats[(index).toString()] = "testUser" // Use seat numbers as keys
+                    }
+                }
+
+                // Log information about the updated bookedSeats
+                Log.d("Booking", "Updated bookedSeats: $updatedBookedSeats")
+
+                // Perform the transaction to update the document
+                db.runTransaction { transaction ->
+                    // Update the document with the new bookedSeats map
+                    transaction.update(tripDoc.reference, "bookedSeats", updatedBookedSeats)
+
+                    // Update sourceCity in the document
+                    //transaction.update(tripDoc.reference, "sourceCity", "Lahore")
+
+                    // Return a dummy result as we only need the transaction for updates
+                    true
+                }
+                    .addOnSuccessListener {
+                        // Handle success
+                        Log.d("Booking", "Booking data saved successfully")
+                        onSuccess() // Invoke the success callback
+                    }
+                    .addOnFailureListener { e ->
+                        // Handle failure
+                        Log.w("Booking", "Error updating document", e)
+                        // You may want to handle this failure differently based on your requirements
+                    }
+            } else {
+                Log.e("Booking", "No document found with id: $busId")
+            }
+        }
+        .addOnFailureListener { e ->
+            // Handle failure to get the document
+            Log.e("Booking", "Error getting document with id: $busId", e)
+        }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Extension function to count elements based on their index and a predicate
 private inline fun <T> Iterable<T>.countIndexed(predicate: (index: Int, T) -> Boolean): Int {
@@ -423,13 +568,6 @@ private inline fun <T> Iterable<T>.countIndexed(predicate: (index: Int, T) -> Bo
     }
     return count
 }
-
-
-
-
-
-
-
 
 
 
