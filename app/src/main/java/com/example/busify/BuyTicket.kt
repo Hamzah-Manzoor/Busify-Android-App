@@ -288,6 +288,7 @@ fun TripCard(
     // Display the SeatSelectionPopup when isPopupVisible is true
     if (isPopupVisible) {
         SeatSelectionPopup(
+            ticketCost = trip.ticketCost,
             userName = username,
             busId = trip.busId,
             sourceCity = trip.sourceCity, // Replace with actual source city
@@ -311,6 +312,7 @@ fun TripCard(
 
 @Composable
 fun SeatSelectionPopup(
+    ticketCost: Int,
     userName: String,
     busId: Int,
     sourceCity: String, // Replace with actual source city
@@ -330,7 +332,7 @@ fun SeatSelectionPopup(
     val userBookedSeats = remember { bookedSeats.map { !it } }
 
     // Calculate total price based on selected seats by the current user
-    totalPrice = selectedSeats.countIndexed { index, selected -> selected && userBookedSeats[index] }
+    totalPrice = (selectedSeats.countIndexed { index, selected -> selected && userBookedSeats[index] })*ticketCost
 
     // Create a dialog with custom dimensions
     Dialog(
