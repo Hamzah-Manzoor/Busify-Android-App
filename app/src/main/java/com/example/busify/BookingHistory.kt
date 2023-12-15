@@ -84,7 +84,7 @@ fun BookingHistoryScreen(username: String) {
             .fillMaxSize()
             .background(Color(10, 40, 80))
             .padding(0.dp)
-            //.verticalScroll(rememberScrollState())
+            ///.verticalScroll(rememberScrollState())
     ) {
         // Page Header
         HeaderSection()
