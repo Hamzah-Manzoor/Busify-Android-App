@@ -72,7 +72,7 @@ fun HomeScreen(username : String, email: String) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(0.dp)
     ) {
         // Top section with balance
         WelcomeSection(username)
@@ -126,29 +126,49 @@ fun BusifySection() {
 @Composable
 fun MainOptionsSection(username: String, email: String) {
     val context = LocalContext.current
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(LightBlue)
             .padding(16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .weight(1f)
                 .padding(end = 8.dp)
         ) {
             OptionCard(OptionItem("Buy Ticket", Icons.Default.LocalAtm),context, username, email)
+        }
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 8.dp)
+        ) {
             OptionCard(OptionItem("My Profile", Icons.Default.AccountCircle),context, username , email)
         }
-        Column(
+        Row(
             modifier = Modifier
                 .weight(1f)
                 .padding(start = 8.dp)
         ) {
             OptionCard(OptionItem("Booking History", Icons.Default.History),context, username, email)
-            OptionCard(OptionItem("Refund", Icons.Default.Payment),context, username, email)
+            //No need to for refund right now
+//            OptionCard(OptionItem("Refund", Icons.Default.Payment),context, username, email)
             //Any Other Card
+        }
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 8.dp)
+        ) {
+            LogoutButton(onLogoutConfirmed = {
+                // This block will be executed when the user confirms logout
+                // Perform the logout action and navigate to the login screen
+                // You can call your navigation function here
+                // For example, navigateToLoginScreen()
+            },context)
         }
     }
 }
@@ -206,8 +226,12 @@ fun navigateToUserProfile(context: Context, username: String, email: String){
     context.startActivity(intent)
 }
 
-//fun navigateToHistory(context: Context, username: String, email: String){
-//}
+fun navigateToHistory(context: Context, username: String){
+    val intent = Intent(context, BookingHistory::class.java)
+    intent.putExtra("username", username)
+    context.startActivity(intent)
+}
+
 fun navigateToScreen(title: String, context: Context, username: String, email: String) {
     if(title == "Buy Ticket"){
         navigateToBuyTicket(context, username)
@@ -216,6 +240,7 @@ fun navigateToScreen(title: String, context: Context, username: String, email: S
         navigateToUserProfile(context, username, email)
     }
     if(title == "Booking History"){
+        navigateToHistory(context, username)
     }
 }
 

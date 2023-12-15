@@ -258,12 +258,6 @@ fun UserProfileView(username : String, email: String) {
                     Text(text = "Update")
                 }
                 Spacer(modifier = Modifier.height(16.dp))
-                LogoutButton(onLogoutConfirmed = {
-                    // This block will be executed when the user confirms logout
-                    // Perform the logout action and navigate to the login screen
-                    // You can call your navigation function here
-                    // For example, navigateToLoginScreen()
-                },context)
             }
 
         }
@@ -287,8 +281,8 @@ fun LogoutButton(onLogoutConfirmed: () -> Unit, context: Context) {
             .height(50.dp)
             .padding(4.dp),
         shape = CircleShape,
-        colors = ButtonDefaults.buttonColors(contentColor = Color.White)
-    ) {
+        colors = ButtonDefaults.buttonColors(Color(214, 40, 40)))
+     {
         Text(text = "Logout", fontSize = 20.sp)
     }
 

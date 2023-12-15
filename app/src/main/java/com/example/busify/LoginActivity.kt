@@ -82,59 +82,6 @@ class LoginActivity : ComponentActivity() {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == RC_GOOGLE_SIGN_IN) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-            try {
-                // Google Sign-In was successful, authenticate with Firebase
-                val account = task.getResult(ApiException::class.java)
-                firebaseAuthWithGoogle(account?.idToken)
-            } catch (e: ApiException) {
-                // Google Sign-In failed, handle the error
-                showToast(this, "Google Sign-In failed: ${e.statusCode}")
-            }
-        }
-    }
-    private fun firebaseAuthWithGoogle(idToken: String?) {
-        val credential = GoogleAuthProvider.getCredential(idToken, null)
-        FirebaseAuth.getInstance().signInWithCredential(credential)
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    // Authentication success
-                    val user = FirebaseAuth.getInstance().currentUser
-                    // Save user information to Firestore if needed
-                    saveUserToFirestore(user)
-                } else {
-                    // Authentication failed
-                    showToast(this, "Authentication failed: ${task.exception?.message}")
-                }
-            }
-    }
-
-    private fun saveUserToFirestore(user: FirebaseUser?) {
-        user?.let {
-            val db = FirebaseFirestore.getInstance()
-            val userData = hashMapOf(
-                "uid" to it.uid,
-                "displayName" to it.displayName,
-                "email" to it.email,
-                // Add other fields as needed
-            )
-
-            db.collection("users").document(it.uid)
-                .set(userData)
-                .addOnSuccessListener {
-                    showToast(this, "User data saved to Firestore")
-                    // Proceed to the next screen or perform additional actions
-                }
-                .addOnFailureListener { e ->
-                    showToast(this, "Error saving user data: $e")
-                }
-        }
-    }
-
 }
 
 fun getGoogleSignInIntent(client: GoogleSignInClient): Intent {
@@ -262,25 +209,25 @@ fun LoginScreen() {
                     Text(text = "Login")
                 }
 
-                Text(text = "OR", color = Color.White)
 
-                // Google Registration Button
-                val googleSignInClient = GoogleSignIn.getClient(
-                    context as ComponentActivity,
-                    GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestIdToken("32289987051-sggur5u61mc0q6cqcbkng3nu7en8r42s.apps.googleusercontent.com")
-                        .requestEmail()
-                        .build()
-                )
-                val signInIntent = getGoogleSignInIntent(googleSignInClient)
-                Button(
-                    onClick = {context.startActivityForResult(signInIntent, RC_GOOGLE_SIGN_IN)},
-                    modifier = Modifier.width(220.dp),
-                    colors = ButtonDefaults.buttonColors(Color(255, 195, 0))
-                ) {
-
-                    Text(text = "Login with Google")
-                }
+//                // Google Registration Button
+//                val googleSignInClient = GoogleSignIn.getClient(
+//                    context as ComponentActivity,
+//                    GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+//                        .requestIdToken("32289987051-sggur5u61mc0q6cqcbkng3nu7en8r42s.apps.googleusercontent.com")
+//                        .requestEmail()
+//                        .build()
+//                )
+//                val signInIntent = getGoogleSignInIntent(googleSignInClient)
+//                Button(
+//                    onClick = {context.startActivityForResult(signInIntent, RC_GOOGLE_SIGN_IN)},
+//                    modifier = Modifier.width(220.dp),
+//                    colors = ButtonDefaults.buttonColors(Color(255, 195, 0))
+//                ) {
+//
+//                    Text(text = "Login with Google")
+//                }
+                // Google sign in didn't work
 
 
                 // Divider
