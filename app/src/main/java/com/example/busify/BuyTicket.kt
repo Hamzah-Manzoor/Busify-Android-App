@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -89,6 +91,7 @@ fun BuyTicketScreen(username : String) {
             .fillMaxSize()
             .background(Blue)
             .padding(0.dp)
+            .verticalScroll(rememberScrollState())
     ) {
         val db = FirebaseFirestore.getInstance()
         LaunchedEffect(key1 = Unit) {
