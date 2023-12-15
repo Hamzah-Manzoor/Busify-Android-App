@@ -2,6 +2,8 @@ package com.example.busify
 
 //import androidx.compose.ui.graphics.Color.Companion.Blue
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -33,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -55,7 +58,8 @@ class HomeActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val username = intent.getStringExtra("username") ?: ""
-                    HomeScreen(username)
+                    val email = intent.getStringExtra("email") ?: ""
+                    HomeScreen(username, email)
                 }
             }
         }
@@ -63,7 +67,7 @@ class HomeActivity : ComponentActivity() {
 }
 
 @Composable
-fun HomeScreen(username : String) {
+fun HomeScreen(username : String, email: String) {
 
     Column(
         modifier = Modifier
@@ -77,7 +81,7 @@ fun HomeScreen(username : String) {
         BusifySection()
 
         // Main options section
-        MainOptionsSection()
+        MainOptionsSection(username, email)
     }
 }
 
@@ -120,7 +124,8 @@ fun BusifySection() {
 
 
 @Composable
-fun MainOptionsSection() {
+fun MainOptionsSection(username: String, email: String) {
+    val context = LocalContext.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -133,28 +138,35 @@ fun MainOptionsSection() {
                 .weight(1f)
                 .padding(end = 8.dp)
         ) {
-            OptionCard(OptionItem("Buy Ticket", Icons.Default.LocalAtm))
-            OptionCard(OptionItem("My Profile", Icons.Default.AccountCircle))
+            OptionCard(OptionItem("Buy Ticket", Icons.Default.LocalAtm),context, username, email)
+            OptionCard(OptionItem("My Profile", Icons.Default.AccountCircle),context, username , email)
         }
         Column(
             modifier = Modifier
                 .weight(1f)
                 .padding(start = 8.dp)
         ) {
-            OptionCard(OptionItem("Booking History", Icons.Default.History))
-            OptionCard(OptionItem("Refund", Icons.Default.Payment))
+            OptionCard(OptionItem("Booking History", Icons.Default.History),context, username, email)
+            OptionCard(OptionItem("Refund", Icons.Default.Payment),context, username, email)
             //Any Other Card
         }
     }
 }
 
 @Composable
-fun OptionCard(option: OptionItem) {
+fun OptionCard(option: OptionItem,context: Context, username: String, email: String) {
     Card(
         modifier = Modifier
             .padding(vertical = 16.dp, horizontal = 8.dp)
             .clip(MaterialTheme.shapes.medium)
-            .clickable { navigateToScreen(option.title) } // Example: navigate to screen based on option title
+            .clickable {
+                navigateToScreen(
+                    option.title,
+                    context,
+                    username ,
+                    email
+                )
+            } // Example: navigate to screen based on option title
             .fillMaxWidth()
             .height(120.dp),
     ) {
@@ -181,8 +193,29 @@ fun OptionCard(option: OptionItem) {
     }
 }
 
-fun navigateToScreen(title: String) {
-    TODO("Not yet implemented")
+fun navigateToBuyTicket(context: Context) {
+    val intent = Intent(context, BuyTicket::class.java)
+    context.startActivity(intent)
+}
+
+fun navigateToUserProfile(context: Context, username: String, email: String){
+    val intent = Intent(context, UserProfile::class.java)
+    intent.putExtra("username", username)
+    intent.putExtra("email", email)
+    context.startActivity(intent)
+}
+
+//fun navigateToHistory(context: Context, username: String, email: String){
+//}
+fun navigateToScreen(title: String, context: Context, username: String, email: String) {
+    if(title == "Buy Ticket"){
+        navigateToBuyTicket(context)
+    }
+    if(title == "My Profile"){
+        navigateToUserProfile(context, username, email)
+    }
+    if(title == "Booking History"){
+    }
 }
 
 

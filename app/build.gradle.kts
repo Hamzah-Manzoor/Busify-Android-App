@@ -56,6 +56,9 @@ dependencies {
     implementation (platform("com.google.firebase:firebase-bom:31.0.0"))
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.android.gms:play-services-auth:19.2.0")
+
+
 
     implementation("androidx.compose.material:material-icons-core:1.5.4") // Replace with the correct version
     implementation("androidx.compose.material:material-icons-extended:1.5.4") // Replace with the correct version

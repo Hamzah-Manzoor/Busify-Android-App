@@ -3,6 +3,7 @@ package com.example.busify
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings.Global.getString
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -50,9 +51,19 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat.startActivityForResult
 import com.example.busify.ui.theme.BusifyTheme
 import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.FirebaseFirestore
+import androidx.activity.result.contract.ActivityResultContracts
+import com.google.firebase.auth.FirebaseAuth
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GoogleAuthProvider
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,6 +81,64 @@ class LoginActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == RC_GOOGLE_SIGN_IN) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+            try {
+                // Google Sign-In was successful, authenticate with Firebase
+                val account = task.getResult(ApiException::class.java)
+                firebaseAuthWithGoogle(account?.idToken)
+            } catch (e: ApiException) {
+                // Google Sign-In failed, handle the error
+                showToast(this, "Google Sign-In failed: ${e.statusCode}")
+            }
+        }
+    }
+    private fun firebaseAuthWithGoogle(idToken: String?) {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        FirebaseAuth.getInstance().signInWithCredential(credential)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    // Authentication success
+                    val user = FirebaseAuth.getInstance().currentUser
+                    // Save user information to Firestore if needed
+                    saveUserToFirestore(user)
+                } else {
+                    // Authentication failed
+                    showToast(this, "Authentication failed: ${task.exception?.message}")
+                }
+            }
+    }
+
+    private fun saveUserToFirestore(user: FirebaseUser?) {
+        user?.let {
+            val db = FirebaseFirestore.getInstance()
+            val userData = hashMapOf(
+                "uid" to it.uid,
+                "displayName" to it.displayName,
+                "email" to it.email,
+                // Add other fields as needed
+            )
+
+            db.collection("users").document(it.uid)
+                .set(userData)
+                .addOnSuccessListener {
+                    showToast(this, "User data saved to Firestore")
+                    // Proceed to the next screen or perform additional actions
+                }
+                .addOnFailureListener { e ->
+                    showToast(this, "Error saving user data: $e")
+                }
+        }
+    }
+
+}
+
+fun getGoogleSignInIntent(client: GoogleSignInClient): Intent {
+    return client.signInIntent
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -196,8 +265,16 @@ fun LoginScreen() {
                 Text(text = "OR", color = Color.White)
 
                 // Google Registration Button
+                val googleSignInClient = GoogleSignIn.getClient(
+                    context as ComponentActivity,
+                    GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestIdToken("32289987051-sggur5u61mc0q6cqcbkng3nu7en8r42s.apps.googleusercontent.com")
+                        .requestEmail()
+                        .build()
+                )
+                val signInIntent = getGoogleSignInIntent(googleSignInClient)
                 Button(
-                    onClick = {},
+                    onClick = {context.startActivityForResult(signInIntent, RC_GOOGLE_SIGN_IN)},
                     modifier = Modifier.width(220.dp),
                     colors = ButtonDefaults.buttonColors(Color(255, 195, 0))
                 ) {
@@ -232,6 +309,8 @@ fun LoginScreen() {
     }
 }
 
+const val RC_GOOGLE_SIGN_IN = 456
+
 fun handleLogin(context: Context, username : String, password: String, db: FirebaseFirestore){
 
     if(username.isEmpty() && password.isEmpty()){
@@ -256,6 +335,7 @@ fun handleLogin(context: Context, username : String, password: String, db: Fireb
                 // Now, check if the provided password matches the stored password
                 val userDocument = documents.documents[0]
                 val storedPassword = userDocument.getString("password") // Replace "password" with the actual field name in your Fire store document
+                val email = userDocument.getString("email")
 
                 if (password == storedPassword) {
                     // Passwords match, login successful
@@ -264,6 +344,7 @@ fun handleLogin(context: Context, username : String, password: String, db: Fireb
                     // Redirect to the next screen or perform any necessary actions
                     val intent = Intent(context, HomeActivity::class.java)
                     intent.putExtra("username", username)
+                    intent.putExtra("email", email)
                     context.startActivity(intent)
                 } else {
                     // Passwords do not match
@@ -278,8 +359,6 @@ fun handleLogin(context: Context, username : String, password: String, db: Fireb
             showToast(context, "Error checking user: $e")
         }
 }
-
-
 
 @Preview(showBackground = true, heightDp = 550, widthDp = 350)
 @Composable
